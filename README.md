@@ -1,4 +1,4 @@
-# Django rest API implementation for passwordless login(Login with otp/passcode) with JWT authentication.
+# Django rest API implementation for passwordless login (Login with otp/passcode) with JWT authentication.
 
 Django login system without password, Register with phone number and get an otp. Verify yourself by providing otp and receive JWT refresh token and access token. Use access token to update profile of the user.
 
