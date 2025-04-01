@@ -7,8 +7,8 @@ from .managers import CustomUserManager
 
 class CustomUser(AbstractUser, PermissionsMixin):
     username = None
-    is_superuser = None
-    is_staff = None
+    # is_superuser = None
+    # is_staff = None
 
     phone_number = models.CharField(unique=True, max_length=14)
     email = models.EmailField(_('email address'), unique=True, null=True)

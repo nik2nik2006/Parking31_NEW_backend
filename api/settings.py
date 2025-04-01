@@ -1,4 +1,6 @@
 # flake8: noqa
+import sys
+# import dj_database_url
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -7,28 +9,29 @@ from pathlib import Path
 from django.conf import settings
 
 
-def get_env_data_as_dict(path: str) -> dict:
-    with open(path, 'r') as f:
-        return dict(tuple(line.replace('\n', '').split('=')) for line in f.readlines() if not line.startswith('#'))
+# def get_env_data_as_dict(path: str) -> dict:
+#     with open(path, 'r') as f:
+#         return dict(tuple(line.replace('\n', '').split('=')) for line in f.readlines() if not line.startswith('#'))
 
 
-vars_dict = get_env_data_as_dict('.env')
-os.environ.update(vars_dict)
+# vars_dict = get_env_data_as_dict('.env')
+# os.environ.update(vars_dict)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEVELOPMENT_MODE = os.environ.get("DEVELOPMENT_MODE", "False") == "True"
+# DEVELOPMENT_MODE = os.environ.get("DEVELOPMENT_MODE", "False") == "True"
+DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-8#ccs1y4&&3xr^ume^9$mcfty@$&)*p!7i&m$+d-zjg3#&&5a4")
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-8#ccs1y4&&3xr^ume^9$mcfty@$&)*p!7i&m$+d-zjg3#&&5a4")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", default=True)
+DEBUG = os.getenv("DEBUG", default=True)
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1 [::1]").split(" ")
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1 [::1]".split(" "))
 
 # Application definition
 
@@ -43,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'djoser',
     'rest_framework_simplejwt',
+    # 'storages',
     'api.authentication',
 ]
 
@@ -80,16 +84,33 @@ WSGI_APPLICATION = 'api.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = {
+if DEVELOPMENT_MODE is True:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    DATABASES = {
     'default': {
-        'ENGINE': os.environ.get("DB_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.environ.get("DB_DATABASE", os.path.join(BASE_DIR, "db.sqlite3")),
-        "USER": os.environ.get("DB_USER", "user"),
-        "PASSWORD": os.environ.get("DB_PASSWORD", "password"),
-        "HOST": os.environ.get("DB_HOST", "localhost"),
-        "PORT": os.environ.get("DB_PORT", "5432"),
+        # Меняем настройку Django: теперь для работы будет использоваться
+        # бэкенд postgresql
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB', 'django'),
+        'USER': os.getenv('POSTGRES_USER', 'django'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', ''),
+        'PORT': os.getenv('DB_PORT', 5432)
     }
 }
+    
+# elif len(sys.argv) > 0 and sys.argv[1] != 'collectstatic':
+#     if os.environ.get('DATABASE_URL', None) is None:
+#         raise Exception('DATABASE_URL environment variable not defined')
+#     DATABASES = {
+#         'default': dj_database_url.parse(os.environ.get('DATABASE_URL')),
+#     }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -127,10 +148,17 @@ APPEND_SLASH = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = '/static/'
-SATTIC_ROOT = BASE_DIR / 'static'
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+
+if DEVELOPMENT_MODE is True:
+    STATIC_URL = '/static/'
+    SATTIC_ROOT = BASE_DIR / 'static'
+    MEDIA_URL = 'media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
+else:
+    STATIC_URL = '/static/'
+    SATTIC_ROOT = BASE_DIR / 'static'
+    MEDIA_URL = 'media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -146,7 +174,7 @@ REST_FRAMEWORK = {
     # 'DEFAULT_PERMISSION_CLASSES': [
     #     'rest_framework.permissions.IsAuthenticated',  
     # ],
-    "EXCEPTION_HANDLER": "api.authentication.exceptions.custom_exception_handler",
+    'EXCEPTION_HANDLER': 'api.authentication.exceptions.custom_exception_handler',
 }
 
 DJOSER = {
@@ -166,7 +194,7 @@ AUTH_COOKIE_HTTP_ONLY = True
 AUTH_COOKIE_PATH = '/'
 AUTH_COOKIE_SAMESITE = 'None'
 
-CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', "http://localhost:3000,http://127.0.0.1:3000".split(","))
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', "http://localhost:3000,http://127.0.0.1:3000".split(","))
 CORS_ALLOW_CREDENTIALS = True
 
 SIMPLE_JWT = {
