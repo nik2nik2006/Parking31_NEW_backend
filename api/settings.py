@@ -19,8 +19,8 @@ from django.conf import settings
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# DEVELOPMENT_MODE = os.environ.get("DEVELOPMENT_MODE", "False") == "True"
-DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
+DEVELOPMENT_MODE = True
+# DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -31,7 +31,8 @@ SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-8#ccs1y4&&3xr^ume^9$mcfty@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", default=True)
 
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost 127.0.0.1 [::1]".split(" "))
+# ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", ['localhost', '127.0.0.1', '0.0.0.0'])
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 # Application definition
 
@@ -42,12 +43,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres', #это модуль Django, который предоставляет интеграцию с базой данных PostgreSQL 
     'corsheaders',
     'rest_framework',
     'djoser',
     'rest_framework_simplejwt',
     # 'storages',
     'api.authentication',
+    
 ]
 
 MIDDLEWARE = [
@@ -96,12 +99,13 @@ else:
     'default': {
         # Меняем настройку Django: теперь для работы будет использоваться
         # бэкенд postgresql
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'django'),
-        'USER': os.getenv('POSTGRES_USER', 'django'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', ''),
-        'PORT': os.getenv('DB_PORT', 5432)
+        'ENGINE': 'django.db.backends.postgresql',   # Используется PostgreSQL
+        'NAME': 'postgres', # Имя базы данных
+        'USER': 'postgres', # Имя пользователя
+        'PASSWORD': 'postgres', # Пароль пользователя
+        # 'HOST': 'pgdb', # Наименование контейнера для базы данных в Docker Compose
+        'HOST': 'localhost', # изменил на локальном компьютере через pgAdmin
+        'PORT': '5432',  # Порт базы данных
     }
 }
     
@@ -189,12 +193,13 @@ DJOSER = {
 AUTH_COOKIE = 'access'
 AUTH_COOKIE_ACCESS_MAX_AGE = 60 * 5
 AUTH_COOKIE_REFRESH_MAX_AGE = 60 * 60 * 24 * 180
-AUTH_COOKIE_SECURE = os.environ.get('AUTH_COOKIE_SECURE', 'True') == 'True'
+AUTH_COOKIE_SECURE = os.getenv('AUTH_COOKIE_SECURE', 'True') == 'True'
 AUTH_COOKIE_HTTP_ONLY = True
 AUTH_COOKIE_PATH = '/'
 AUTH_COOKIE_SAMESITE = 'None'
 
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', "http://localhost:3000,http://127.0.0.1:3000".split(","))
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', "http://localhost:3000,http://127.0.0.1:3000").split(",")
 CORS_ALLOW_CREDENTIALS = True
 
 SIMPLE_JWT = {
